@@ -37,6 +37,9 @@ pnpm-debug.log*
 !.vscode/extensions.json
 .idea/
 
+# Serena MCP server workspace state (local tooling, not project source)
+.serena/
+
 # Husky
 .husky/_
 
