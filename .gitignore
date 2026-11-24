@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Env files — never commit real secrets. .env.example is tracked.
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Turborepo
+.turbo/
+
+# Next.js can write a compiled .js/.d.ts pair next to a TypeScript
+# next.config.ts when its config loader is invoked directly (e.g. via some
+# tool integrations); next.config.ts is the only source of truth.
+apps/web/next.config.js
+apps/web/next.config.d.ts
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Husky
+.husky/_
+
+# Windows MSYS/Git-Bash crash dumps
+*.stackdump

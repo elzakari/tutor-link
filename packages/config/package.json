@@ -1,0 +1,26 @@
+{
+  "name": "@tutor-link/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./eslint/base": "./eslint/base.mjs",
+    "./eslint/boundaries": "./eslint/boundaries.mjs",
+    "./prettier": "./prettier.config.mjs"
+  },
+  "scripts": {
+    "lint": "echo 'packages/config: no lintable source' && exit 0",
+    "typecheck": "echo 'packages/config: config-only package, nothing to typecheck' && exit 0",
+    "test": "echo 'packages/config: no tests' && exit 0"
+  },
+  "dependencies": {
+    "@eslint/js": "9.39.5",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-boundaries": "6.0.2",
+    "typescript-eslint": "8.74.0"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

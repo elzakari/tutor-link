@@ -1,0 +1,25 @@
+{
+  "name": "@tutor-link/ui",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo 'packages/ui: no tests yet' && exit 0"
+  },
+  "devDependencies": {
+    "@tutor-link/config": "workspace:*",
+    "typescript": "5.9.3",
+    "eslint": "9.39.5"
+  }
+}
