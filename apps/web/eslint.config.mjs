@@ -8,11 +8,6 @@ import boundaries from "@tutor-link/config/eslint/boundaries";
 import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import nextTypescript from "eslint-config-next/typescript";
 
-const config = [
-  ...jsAndPrettier,
-  ...boundaries,
-  ...nextCoreWebVitals,
-  ...nextTypescript,
-];
+const config = [...jsAndPrettier, ...boundaries, ...nextCoreWebVitals, ...nextTypescript];
 
 export default config;
