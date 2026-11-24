@@ -10,6 +10,15 @@
 // monorepo root — so `boundaries/root-path` is pinned to the repo root
 // (resolved from this file's own location) rather than left at the plugin's
 // default of `process.cwd()`, which would silently never match anything.
+//
+// Both rules below live under the single canonical `boundaries/dependencies`
+// rule (object-based `from`/`to`/`allow`/`disallow` selectors). The plugin's
+// older `boundaries/entry-point` and `boundaries/element-types` rules are
+// deprecated aliases of this same rule and warn on every lint run — see
+// https://www.jsboundaries.dev/docs/releases/migration-guides/v5-to-v6/.
+// `boundaries/dependencies` evaluates its `rules` array in order with
+// last-match-wins semantics (within one entry, `disallow` beats `allow`), so a
+// later rule can re-allow what an earlier rule disallowed for the same `to`.
 import boundaries from "eslint-plugin-boundaries";
 
 const repoRoot = new URL("../../..", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1");
@@ -43,34 +52,45 @@ export default [
       },
     },
     rules: {
-      // Rule 1: apps/api modules talk to each other only through index.ts.
-      "boundaries/entry-point": [
-        "error",
-        {
-          default: "disallow",
-          rules: [{ target: "api-module", allow: "index.ts" }],
-        },
-      ],
-      // Rule 2: coarse-grained element types — apps never import each other,
-      // and packages never import an app.
-      "boundaries/element-types": [
+      "boundaries/dependencies": [
         "error",
         {
           default: "allow",
           rules: [
+            // Rule 1 (was boundaries/entry-point): apps/api modules talk to
+            // each other only through index.ts. First disallow every
+            // cross-module dependency into an api-module, then re-allow the
+            // one path (internalPath "index.ts") that may be imported — the
+            // later, more specific rule wins over the earlier blanket one.
+            // (Same-module imports never reach these rules at all: the
+            // dependencies rule skips internal — same-instance — dependencies
+            // by default. The `disallow` selector restates the rule's own
+            // `to` on purpose: an empty `{}` selector is rejected by the
+            // plugin as invalid rather than treated as "match everything".)
             {
-              from: "app-web",
-              disallow: ["app-api"],
+              to: { type: "api-module" },
+              disallow: { to: { type: "api-module" } },
+            },
+            {
+              to: { type: "api-module" },
+              allow: { to: { internalPath: "index.ts" } },
+            },
+            // Rule 2 (was boundaries/element-types): coarse-grained element
+            // types — apps never import each other, and packages never
+            // import an app.
+            {
+              from: { type: "app-web" },
+              disallow: { to: { type: "app-api" } },
               message: "apps/web may not import apps/api.",
             },
             {
-              from: "app-api",
-              disallow: ["app-web"],
+              from: { type: "app-api" },
+              disallow: { to: { type: "app-web" } },
               message: "apps/api may not import apps/web.",
             },
             {
-              from: "package",
-              disallow: ["app-web", "app-api"],
+              from: { type: "package" },
+              disallow: { to: { type: ["app-web", "app-api"] } },
               message: "packages/* may not import from an app.",
             },
           ],

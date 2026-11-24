@@ -12,9 +12,23 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
+import globals from "globals";
 
 const ignores = {
   ignores: ["**/dist/**", "**/.next/**", "**/node_modules/**", "**/coverage/**", "**/.turbo/**"],
+};
+
+const nodeConfigFileGlobals = {
+  // Node-authored config/tooling scripts (jest.config.cjs,
+  // commitlint.config.cjs, eslint.config.mjs, prettier.config.mjs,
+  // scripts/*.mjs, ...) always run under Node, never bundled for a browser,
+  // so they get Node's global identifiers (process, console, URL,
+  // __dirname, ...) directly. TypeScript source never needs this: it sees
+  // the same globals through @types/node's ambient declarations instead.
+  files: ["**/*.cjs", "**/*.mjs"],
+  languageOptions: {
+    globals: globals.node,
+  },
 };
 
 const cjsConfigFiles = {
@@ -22,24 +36,22 @@ const cjsConfigFiles = {
   files: ["**/*.cjs"],
   languageOptions: {
     sourceType: "commonjs",
-    globals: {
-      module: "writable",
-      exports: "writable",
-      require: "readonly",
-      process: "readonly",
-      __dirname: "readonly",
-      __filename: "readonly",
-      console: "readonly",
-    },
   },
 };
 
-export const jsAndPrettier = [ignores, js.configs.recommended, prettierConfig, cjsConfigFiles];
+export const jsAndPrettier = [
+  ignores,
+  js.configs.recommended,
+  prettierConfig,
+  nodeConfigFileGlobals,
+  cjsConfigFiles,
+];
 
 export default [
   ignores,
   js.configs.recommended,
   ...tseslint.configs.recommended,
   prettierConfig,
+  nodeConfigFileGlobals,
   cjsConfigFiles,
 ];

@@ -29,7 +29,7 @@ apps/api/src/modules/<module>/
 Nest module class, and any public service/types) — nothing else. A file in
 one module may only import another module through that module's `index.ts`;
 importing `modules/<other>/internal/...`, `modules/<other>/repository/...`,
-etc. directly is a lint error (`boundaries/entry-point`,
+etc. directly is a lint error (`boundaries/dependencies`,
 `packages/config/eslint/boundaries.mjs`). This is how
 `02-architecture.md` §4 rule 6 ("a lint rule blocks imports across module
 internals") is enforced, and how rule 1 ("a module reads and writes only its
