@@ -79,8 +79,14 @@ export default [
             // types — apps never import each other, and packages never
             // import an app.
             {
+              // `to: { type: "app-api" }` alone misses anything under
+              // apps/api/src/modules/*, because the `api-module` element
+              // (declared above, more specific, matched first) claims those
+              // files instead of `app-api` — so this disallow must name
+              // both types or a web import of an API module's internals
+              // (or even its index.ts) would silently pass.
               from: { type: "app-web" },
-              disallow: { to: { type: "app-api" } },
+              disallow: { to: { type: ["app-api", "api-module"] } },
               message: "apps/web may not import apps/api.",
             },
             {
