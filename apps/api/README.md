@@ -4,6 +4,11 @@ NestJS modular monolith, REST under `/api/v1`. See `CLAUDE.md` for the
 non-negotiable rules (deny-by-default guards, ownership scoping, money as
 integer pesewas, etc.) — they apply to everything added here from S1-05 on.
 
+## Known gaps
+
+Health route lacks `@Public()` until S1-05 adds the global deny-by-default
+guard. S1-05 must fix this before any other route is added.
+
 ## Module layout convention
 
 Every feature module lives under `src/modules/<module>/` with this shape:
