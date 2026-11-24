@@ -7,6 +7,11 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "incremental": true,
+    // apps/web never emits via tsc directly: `next build` does its own
+    // compilation and `typecheck` already passes --noEmit on the CLI, so
+    // this is belt-and-braces (and matches Next.js's own scaffolded
+    // tsconfig.json default) rather than a fix for an observed emission.
+    "noEmit": true,
     "plugins": [{ "name": "next" }]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
