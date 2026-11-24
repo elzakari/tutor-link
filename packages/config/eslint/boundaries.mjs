@@ -19,6 +19,9 @@
 // `boundaries/dependencies` evaluates its `rules` array in order with
 // last-match-wins semantics (within one entry, `disallow` beats `allow`), so a
 // later rule can re-allow what an earlier rule disallowed for the same `to`.
+// Pinned to 6.0.2 (not the 7.x line): 6.0.2 already supports the canonical
+// object-based `boundaries/dependencies` rule this file relies on, so there is
+// no need to track the newer major version.
 import boundaries from "eslint-plugin-boundaries";
 
 const repoRoot = new URL("../../..", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1");
