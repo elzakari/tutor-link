@@ -15,7 +15,10 @@
     "prettier --write",
     "eslint --fix --config packages/ui/eslint.config.mjs"
   ],
-  "packages/config/**/*.{js,mjs,cjs}": ["prettier --write"],
-  "*.{js,mjs,cjs}": ["prettier --write"],
+  "packages/config/**/*.{js,mjs,cjs}": [
+    "prettier --write",
+    "eslint --fix --config packages/config/eslint.config.mjs"
+  ],
+  "*.{js,mjs,cjs}": ["prettier --write", "eslint --fix --config eslint.config.mjs"],
   "*.{json,md,yml,yaml}": ["prettier --write"]
 }
