@@ -98,8 +98,12 @@ export default [
               message: "apps/api may not import apps/web.",
             },
             {
+              // As with the app-web rule above, `api-module` (more specific,
+              // matched first) claims anything under apps/api/src/modules/*,
+              // so this disallow must name it alongside app-web and app-api
+              // or a package import of an API module would silently pass.
               from: { type: "package" },
-              disallow: { to: { type: ["app-web", "app-api"] } },
+              disallow: { to: { type: ["app-web", "app-api", "api-module"] } },
               message: "packages/* may not import from an app.",
             },
           ],
