@@ -1,0 +1,14 @@
+# Pre-existing project content from outside S1-01's monorepo-tooling scope.
+# CLAUDE.md and docs/specs/** are the source of truth (CLAUDE.md "Source of
+# truth" section) with deliberate human prose formatting; reformatting them
+# here would be an out-of-scope change to content this task didn't touch.
+CLAUDE.md
+docs/
+docs/**
+
+# Editor/tool-specific config, not part of this monorepo's own tooling.
+.serena/
+.serena/**
+
+# Generated/managed files that don't need or benefit from Prettier.
+pnpm-lock.yaml

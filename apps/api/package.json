@@ -1,0 +1,34 @@
+{
+  "name": "@tutor-link/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "dev": "nest start --watch",
+    "start": "node dist/main.js",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "jest",
+    "test:e2e": "echo 'apps/api: Playwright e2e harness lands in S1-12' && exit 0"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.2.11",
+    "@nestjs/core": "11.2.11",
+    "@nestjs/platform-express": "11.2.11",
+    "@tutor-link/contracts": "workspace:*",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "11.0.10",
+    "@nestjs/testing": "11.2.11",
+    "@tutor-link/config": "workspace:*",
+    "@types/jest": "30.0.0",
+    "@types/node": "26.6.6",
+    "eslint": "9.39.5",
+    "jest": "30.5.2",
+    "supertest": "7.3.2",
+    "ts-jest": "29.4.15",
+    "typescript": "5.9.3"
+  }
+}

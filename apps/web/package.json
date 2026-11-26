@@ -1,0 +1,30 @@
+{
+  "name": "@tutor-link/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo 'apps/web: Vitest component tests land in S1-09' && exit 0",
+    "test:e2e": "echo 'apps/web: Playwright e2e harness lands in S1-12' && exit 0"
+  },
+  "dependencies": {
+    "@tutor-link/contracts": "workspace:*",
+    "@tutor-link/ui": "workspace:*",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@tutor-link/config": "workspace:*",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.6",
+    "typescript": "5.9.3"
+  }
+}
