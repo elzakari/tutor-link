@@ -1,5 +1,5 @@
-# Sensitive areas needing 2 human reviewers (CLAUDE.md "Sensitive areas").
-# @tech-lead is a placeholder GitHub handle — replace it with the real
+﻿# Sensitive areas needing 2 human reviewers (CLAUDE.md "Sensitive areas").
+# @elzakari is a placeholder GitHub handle â€” replace it with the real
 # tech lead's handle before this takes effect. GitHub requires every owner
 # listed here to have at least read access to the repository.
 #
@@ -9,26 +9,26 @@
 # so this file does not silently stop matching once those modules exist.
 
 # Payments and ledger
-apps/api/src/modules/payments/**        @tech-lead
-apps/api/src/modules/payments-ledger/** @tech-lead
-apps/api/src/modules/ledger/**          @tech-lead
+apps/api/src/modules/payments/**        @elzakari
+apps/api/src/modules/payments-ledger/** @elzakari
+apps/api/src/modules/ledger/**          @elzakari
 
 # Identity and auth
-apps/api/src/modules/identity/**        @tech-lead
-apps/api/src/modules/identity-access/** @tech-lead
+apps/api/src/modules/identity/**        @elzakari
+apps/api/src/modules/identity-access/** @elzakari
 
 # RBAC guards
-apps/api/src/**/rbac/**                 @tech-lead
-apps/api/src/**/guards/**               @tech-lead
+apps/api/src/**/rbac/**                 @elzakari
+apps/api/src/**/guards/**               @elzakari
 
 # Safeguarding: check-in, recordings
-apps/api/src/modules/sessions-safety/** @tech-lead
+apps/api/src/modules/sessions-safety/** @elzakari
 
 # Every migration
-apps/api/prisma/migrations/**           @tech-lead
-infra/db/**                             @tech-lead
+apps/api/prisma/migrations/**           @elzakari
+infra/db/**                             @elzakari
 
 # Address or recording code, wherever it lands
-apps/api/src/**/address/**              @tech-lead
-apps/api/src/**/*address*               @tech-lead
-apps/api/src/**/*recording*             @tech-lead
+apps/api/src/**/address/**              @elzakari
+apps/api/src/**/*address*               @elzakari
+apps/api/src/**/*recording*             @elzakari
