@@ -1,0 +1,95 @@
+name: tutor-link
+
+# Local development services only (S1-02, 02-architecture.md section 9).
+# Credentials below are fixed, non-secret local defaults — never used outside
+# this compose file, never reachable from outside localhost, and never the
+# values apps/api or apps/web ship with in production. See docs/dev-setup.md.
+#
+# Every host port can be overridden from the shell if it clashes with
+# something else already running on your machine, e.g.:
+#   POSTGRES_PORT=5434 pnpm docker:up
+# See docs/dev-setup.md "Troubleshooting" for the full list.
+#
+# Out of scope here (see docs/orchestration/sprint-1.md S1-02): database
+# migrations and database health checks (S1-05), and CI.
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: tutor-link-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tutor_link
+      POSTGRES_PASSWORD: tutor_link_dev
+      POSTGRES_DB: tutor_link
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - tutor-link-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tutor_link -d tutor_link"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: tutor-link-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # bitnamilegacy/* mirrors the upstream MinIO community images that Docker
+  # Hub and quay.io/minio stopped serving anonymously in 2025; it is the
+  # current pullable source for the same open-source MinIO server and mc
+  # client.
+  minio:
+    image: bitnamilegacy/minio:2025.5.24-debian-12-r5
+    container_name: tutor-link-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: tutor_link
+      MINIO_ROOT_PASSWORD: tutor_link_dev_minio
+    ports:
+      - "${MINIO_PORT:-9000}:9000" # S3 API
+      - "${MINIO_CONSOLE_PORT:-9001}:9001" # Web console
+    volumes:
+      - tutor-link-minio-data:/bitnami/minio/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot: creates the private buckets then exits. `docker compose up`
+  # reports it as "exited (0)", which is expected, not a failure.
+  minio-init:
+    image: bitnamilegacy/minio-client:2025.5.21-debian-12-r4
+    container_name: tutor-link-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: tutor_link
+      MINIO_ROOT_PASSWORD: tutor_link_dev_minio
+    entrypoint: ["/bin/sh", "/init/create-buckets.sh"]
+    volumes:
+      - ./minio/create-buckets.sh:/init/create-buckets.sh:ro
+    restart: "no"
+
+  mailpit:
+    image: axllent/mailpit:v1.21.3
+    container_name: tutor-link-mailpit
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025" # SMTP
+      - "${MAILPIT_UI_PORT:-8025}:8025" # Web UI
+
+volumes:
+  tutor-link-postgres-data:
+  tutor-link-minio-data:
