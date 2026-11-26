@@ -1,0 +1,34 @@
+# Sensitive areas needing 2 human reviewers (CLAUDE.md "Sensitive areas").
+# @tech-lead is a placeholder GitHub handle — replace it with the real
+# tech lead's handle before this takes effect. GitHub requires every owner
+# listed here to have at least read access to the repository.
+#
+# Module names below cover both the pre-S1-05 shorthand in CLAUDE.md
+# (ledger/**, identity/**, sessions-safety/**) and the module skeleton
+# names S1-05 will actually create (payments-ledger, identity-access),
+# so this file does not silently stop matching once those modules exist.
+
+# Payments and ledger
+apps/api/src/modules/payments/**        @tech-lead
+apps/api/src/modules/payments-ledger/** @tech-lead
+apps/api/src/modules/ledger/**          @tech-lead
+
+# Identity and auth
+apps/api/src/modules/identity/**        @tech-lead
+apps/api/src/modules/identity-access/** @tech-lead
+
+# RBAC guards
+apps/api/src/**/rbac/**                 @tech-lead
+apps/api/src/**/guards/**               @tech-lead
+
+# Safeguarding: check-in, recordings
+apps/api/src/modules/sessions-safety/** @tech-lead
+
+# Every migration
+apps/api/prisma/migrations/**           @tech-lead
+infra/db/**                             @tech-lead
+
+# Address or recording code, wherever it lands
+apps/api/src/**/address/**              @tech-lead
+apps/api/src/**/*address*               @tech-lead
+apps/api/src/**/*recording*             @tech-lead
