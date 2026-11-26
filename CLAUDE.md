@@ -85,6 +85,8 @@ Keep this list accurate. If you add or rename a script, update this section in t
 
 ## How to work on a task
 
+Never commit to main. Always work on the task's branch; main only changes through a reviewed merge.
+
 1. **Read** the task prompt, the spec sections it names, and the existing code it touches.
 2. **Plan** first. For anything over about 3 files, present a short plan (files, approach, tests) and wait for approval if the prompt says "plan first".
 3. **Write or update the tests first** for business rules: acceptance tests from the PRD, ownership and permission tests.

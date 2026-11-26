@@ -1,0 +1,33 @@
+# Sensitive areas needing 2 human reviewers (CLAUDE.md "Sensitive areas").
+# Owner: @elzakari. Add the tech lead's handle here when one joins.
+# Every owner listed here needs at least read access to the repository.
+#
+# Module names below cover both the pre-S1-05 shorthand in CLAUDE.md
+# (ledger/**, identity/**, sessions-safety/**) and the module skeleton
+# names S1-05 will actually create (payments-ledger, identity-access),
+# so this file does not silently stop matching once those modules exist.
+
+# Payments and ledger
+apps/api/src/modules/payments/**        @elzakari
+apps/api/src/modules/payments-ledger/** @elzakari
+apps/api/src/modules/ledger/**          @elzakari
+
+# Identity and auth
+apps/api/src/modules/identity/**        @elzakari
+apps/api/src/modules/identity-access/** @elzakari
+
+# RBAC guards
+apps/api/src/**/rbac/**                 @elzakari
+apps/api/src/**/guards/**               @elzakari
+
+# Safeguarding: check-in, recordings
+apps/api/src/modules/sessions-safety/** @elzakari
+
+# Every migration
+apps/api/prisma/migrations/**           @elzakari
+infra/db/**                             @elzakari
+
+# Address or recording code, wherever it lands
+apps/api/src/**/address/**              @elzakari
+apps/api/src/**/*address*               @elzakari
+apps/api/src/**/*recording*             @elzakari
