@@ -1,7 +1,6 @@
 # Sensitive areas needing 2 human reviewers (CLAUDE.md "Sensitive areas").
-# @elzakari is a placeholder GitHub handle â€” replace it with the real
-# tech lead's handle before this takes effect. GitHub requires every owner
-# listed here to have at least read access to the repository.
+# Owner: @elzakari. Add the tech lead's handle here when one joins.
+# Every owner listed here needs at least read access to the repository.
 #
 # Module names below cover both the pre-S1-05 shorthand in CLAUDE.md
 # (ledger/**, identity/**, sessions-safety/**) and the module skeleton
