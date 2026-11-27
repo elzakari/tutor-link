@@ -18,5 +18,14 @@ const require = createRequire(import.meta.url);
 
 export function runPrismaCli(args, { cwd }) {
   const prismaCliEntry = require.resolve("prisma/build/index.js");
-  return spawn(process.execPath, [prismaCliEntry, ...args], { cwd, stdio: "inherit" });
+  return spawn(process.execPath, [prismaCliEntry, ...args], {
+    cwd,
+    stdio: "inherit",
+    // Prisma's CLI prints an "Update available" banner on stdout whenever a
+    // newer version exists, independent of anything this repo controls —
+    // it broke prisma-diff.integration-spec.ts, which used to match db:diff's
+    // output against a fixed string. Suppressing it keeps every Prisma CLI
+    // call's output limited to what the command itself reports.
+    env: { ...process.env, PRISMA_HIDE_UPDATE_MESSAGE: "1" },
+  });
 }
