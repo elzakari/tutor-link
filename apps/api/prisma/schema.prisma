@@ -1,0 +1,420 @@
+// Tutor Link — Prisma schema for S1-04's scope (reference, platform and
+// identity/family tables). Mirrors apps/api/prisma/migrations/*/migration.sql
+// column-for-column; types Prisma cannot express natively (PostGIS geography)
+// use Unsupported(...). Every timestamptz column is pinned to
+// @db.Timestamptz(6) to match Postgres's default `timestamptz` precision
+// exactly — without it, `prisma migrate diff` reports every timestamp
+// column (and everything that depends on it) as changed.
+//
+// Prisma can represent the GiST index on the unsupported PostGIS centroid
+// column (`@@index(..., type: Gist)`) even though it cannot query the column
+// through Prisma Client; raw SQL handles geospatial operations later.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// 0002_reference
+// ---------------------------------------------------------------------------
+
+model Region {
+  id        String     @id @db.Uuid
+  name      String     @unique
+  districts District[]
+  createdAt DateTime   @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt DateTime   @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@map("region")
+}
+
+model District {
+  id         String     @id @db.Uuid
+  regionId   String     @map("region_id") @db.Uuid
+  region     Region     @relation(fields: [regionId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  name       String
+  localities Locality[]
+  createdAt  DateTime   @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt  DateTime   @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@unique([regionId, name])
+  @@index([regionId], map: "district_region_id_idx")
+  @@map("district")
+}
+
+model Locality {
+  id                String            @id @db.Uuid
+  districtId        String            @map("district_id") @db.Uuid
+  district          District          @relation(fields: [districtId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  name              String
+  // Prisma Client cannot query PostGIS geography directly; the GiST index
+  // is still represented below so migrate diff stays drift-free.
+  centroid          Unsupported("geography(Point, 4326)")?
+  isServed          Boolean           @default(false) @map("is_served")
+  guardianProfiles  GuardianProfile[]
+  guardianAddresses GuardianAddress[]
+  createdAt         DateTime          @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt         DateTime          @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@unique([districtId, name])
+  @@index([districtId], map: "locality_district_id_idx")
+  @@index([centroid], type: Gist, map: "locality_centroid_gix")
+  @@map("locality")
+}
+
+model Subject {
+  id            String         @id @db.Uuid
+  name          String         @unique
+  slug          String         @unique
+  childSubjects ChildSubject[]
+  createdAt     DateTime       @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt     DateTime       @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@map("subject")
+}
+
+model ClassLevel {
+  id            String         @id @db.Uuid
+  name          String         @unique
+  stage         String
+  sortOrder     Int            @map("sort_order") @db.SmallInt
+  childProfiles ChildProfile[]
+  createdAt     DateTime       @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt     DateTime       @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@map("class_level")
+}
+
+model Curriculum {
+  id        String   @id @db.Uuid
+  name      String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt DateTime @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@map("curriculum")
+}
+
+// ---------------------------------------------------------------------------
+// 0003_platform
+// ---------------------------------------------------------------------------
+
+enum OrganisationType {
+  platform
+  school
+  agency
+  ngo
+  sponsor
+
+  @@map("organisation_type")
+}
+
+model Organisation {
+  id                String           @id @db.Uuid
+  name              String
+  type              OrganisationType
+  isPlatformDefault Boolean          @default(false) @map("is_platform_default")
+  status            String           @default("active")
+  userRoles         UserRole[]
+  createdAt         DateTime         @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt         DateTime         @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@map("organisation")
+}
+
+model ConfigSetting {
+  id            String       @id @db.Uuid
+  key           String       @unique
+  value         Json
+  updatedBy     String?      @map("updated_by") @db.Uuid
+  updatedByUser UserAccount? @relation(fields: [updatedBy], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  createdAt     DateTime     @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt     DateTime     @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@index([updatedBy], map: "config_setting_updated_by_idx")
+  @@map("config_setting")
+}
+
+model FeatureFlag {
+  id        String   @id @db.Uuid
+  key       String   @unique
+  enabled   Boolean  @default(false)
+  rules     Json?
+  createdAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt DateTime @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@map("feature_flag")
+}
+
+model AuditLog {
+  id         String       @id @db.Uuid
+  actorId    String?      @map("actor_id") @db.Uuid
+  actor      UserAccount? @relation(fields: [actorId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  action     String
+  targetType String       @map("target_type")
+  targetId   String?      @map("target_id") @db.Uuid
+  reason     String?
+  metadata   Json?
+  ip         String?      @db.Inet
+  occurredAt DateTime     @db.Timestamptz(6) @map("occurred_at")
+  createdAt  DateTime     @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt  DateTime     @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@index([targetType, targetId], map: "audit_log_target_idx")
+  @@index([actorId, occurredAt(sort: Desc)], map: "audit_log_actor_occurred_idx")
+  @@map("audit_log")
+}
+
+model OutboxEvent {
+  id          String    @id @db.Uuid
+  type        String
+  payload     Json
+  occurredAt  DateTime  @db.Timestamptz(6) @map("occurred_at")
+  publishedAt DateTime? @db.Timestamptz(6) @map("published_at")
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt   DateTime  @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@map("outbox_event")
+}
+
+// ---------------------------------------------------------------------------
+// 0004_identity_family
+// ---------------------------------------------------------------------------
+
+enum UserStatus {
+  active
+  suspended
+  deactivated
+
+  @@map("user_status")
+}
+
+enum RoleType {
+  guardian
+  tutor
+  student
+  org_member
+  staff
+
+  @@map("role_type")
+}
+
+enum StaffRole {
+  super_admin
+  operations
+  safeguarding
+  finance
+  support
+  moderator
+  marketing
+
+  @@map("staff_role")
+}
+
+enum OtpPurpose {
+  login
+  signup
+  step_up
+  session_checkin
+
+  @@map("otp_purpose")
+}
+
+enum ConsentType {
+  terms
+  privacy
+  guardian_for_child
+  kyc_check
+  record_sharing
+  marketing
+
+  @@map("consent_type")
+}
+
+model UserAccount {
+  id              String            @id @db.Uuid
+  phoneE164       String            @unique @map("phone_e164")
+  email           String?           @unique @db.Citext
+  fullName        String            @map("full_name")
+  status          UserStatus        @default(active)
+  phoneVerifiedAt DateTime?         @db.Timestamptz(6) @map("phone_verified_at")
+  phoneChangedAt  DateTime?         @db.Timestamptz(6) @map("phone_changed_at")
+  lastLoginAt     DateTime?         @db.Timestamptz(6) @map("last_login_at")
+  deletedAt       DateTime?         @db.Timestamptz(6) @map("deleted_at")
+  createdAt       DateTime          @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt       DateTime          @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  userRoles       UserRole[]
+  authSessions    AuthSession[]
+  staffProfile    StaffProfile?
+  guardianProfile GuardianProfile?
+  consentRecords  ConsentRecord[]
+  configSettings  ConfigSetting[]
+  auditLogs       AuditLog[]
+
+  @@map("user_account")
+}
+
+model UserRole {
+  id             String       @id @db.Uuid
+  userId         String       @map("user_id") @db.Uuid
+  user           UserAccount  @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  role           RoleType
+  organisationId String       @map("organisation_id") @db.Uuid
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  createdAt      DateTime     @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt      DateTime     @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@unique([userId, role, organisationId])
+  @@index([userId], map: "user_role_user_id_idx")
+  @@index([organisationId], map: "user_role_organisation_id_idx")
+  @@map("user_role")
+}
+
+model AuthSession {
+  id               String      @id @db.Uuid
+  userId           String      @map("user_id") @db.Uuid
+  user             UserAccount @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  familyId         String      @map("family_id") @db.Uuid
+  refreshTokenHash String      @unique @map("refresh_token_hash")
+  userAgent        String?     @map("user_agent")
+  ip               String?     @db.Inet
+  expiresAt        DateTime    @db.Timestamptz(6) @map("expires_at")
+  revokedAt        DateTime?   @db.Timestamptz(6) @map("revoked_at")
+  createdAt        DateTime    @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt        DateTime    @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@index([userId], map: "auth_session_user_id_idx")
+  @@index([familyId], map: "auth_session_family_id_idx")
+  @@map("auth_session")
+}
+
+model OtpChallenge {
+  id         String     @id @db.Uuid
+  phoneE164  String     @map("phone_e164")
+  purpose    OtpPurpose
+  codeHash   String     @map("code_hash")
+  attempts   Int        @default(0) @db.SmallInt
+  expiresAt  DateTime   @db.Timestamptz(6) @map("expires_at")
+  consumedAt DateTime?  @db.Timestamptz(6) @map("consumed_at")
+  createdAt  DateTime   @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt  DateTime   @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@index([phoneE164, purpose, createdAt(sort: Desc)], map: "otp_challenge_phone_purpose_idx")
+  @@map("otp_challenge")
+}
+
+model StaffProfile {
+  id            String      @id @db.Uuid
+  userId        String      @unique @map("user_id") @db.Uuid
+  user          UserAccount @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  staffRole     StaffRole   @map("staff_role")
+  totpSecretEnc Bytes?      @map("totp_secret_enc")
+  mfaEnrolledAt DateTime?   @db.Timestamptz(6) @map("mfa_enrolled_at")
+  createdAt     DateTime    @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt     DateTime    @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@map("staff_profile")
+}
+
+model StaffPermission {
+  id         String    @id @db.Uuid
+  staffRole  StaffRole @map("staff_role")
+  permission String
+  createdAt  DateTime  @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt  DateTime  @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@unique([staffRole, permission])
+  @@map("staff_permission")
+}
+
+model GuardianProfile {
+  id         String            @id @db.Uuid
+  userId     String            @unique @map("user_id") @db.Uuid
+  user       UserAccount       @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  localityId String?           @map("locality_id") @db.Uuid
+  locality   Locality?         @relation(fields: [localityId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  addresses  GuardianAddress[]
+  children   ChildProfile[]
+  createdAt  DateTime          @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt  DateTime          @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@index([localityId], map: "guardian_profile_locality_id_idx")
+  @@map("guardian_profile")
+}
+
+model GuardianAddress {
+  id              String          @id @db.Uuid
+  guardianId      String          @map("guardian_id") @db.Uuid
+  guardian        GuardianProfile @relation(fields: [guardianId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  label           String          @default("Home")
+  addressEnc      Bytes           @map("address_enc")
+  ghanapostGpsEnc Bytes?          @map("ghanapost_gps_enc")
+  location        Unsupported("geography(Point, 4326)")?
+  localityId      String          @map("locality_id") @db.Uuid
+  locality        Locality        @relation(fields: [localityId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  deletedAt       DateTime?       @db.Timestamptz(6) @map("deleted_at")
+  createdAt       DateTime        @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt       DateTime        @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@index([guardianId], map: "guardian_address_guardian_id_idx")
+  @@index([localityId], map: "guardian_address_locality_id_idx")
+  @@map("guardian_address")
+}
+
+model ChildProfile {
+  id             String          @id @db.Uuid
+  guardianId     String          @map("guardian_id") @db.Uuid
+  guardian       GuardianProfile @relation(fields: [guardianId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  firstName      String          @map("first_name")
+  classLevelId   String          @map("class_level_id") @db.Uuid
+  classLevel     ClassLevel      @relation(fields: [classLevelId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  learningGoals  String?         @map("learning_goals")
+  deletedAt      DateTime?       @db.Timestamptz(6) @map("deleted_at")
+  createdAt      DateTime        @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt      DateTime        @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  childSubjects  ChildSubject[]
+  consentRecords ConsentRecord[]
+
+  @@index([guardianId], map: "child_profile_guardian_id_idx")
+  @@index([classLevelId], map: "child_profile_class_level_id_idx")
+  @@map("child_profile")
+}
+
+model ChildSubject {
+  id        String       @id @db.Uuid
+  childId   String       @map("child_id") @db.Uuid
+  child     ChildProfile @relation(fields: [childId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  subjectId String       @map("subject_id") @db.Uuid
+  subject   Subject      @relation(fields: [subjectId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  createdAt DateTime     @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt DateTime     @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@unique([childId, subjectId])
+  @@index([subjectId], map: "child_subject_subject_id_idx")
+  @@map("child_subject")
+}
+
+model ConsentRecord {
+  id            String        @id @db.Uuid
+  userId        String        @map("user_id") @db.Uuid
+  user          UserAccount   @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  childId       String?       @map("child_id") @db.Uuid
+  child         ChildProfile? @relation(fields: [childId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  consent       ConsentType
+  policyVersion String        @map("policy_version")
+  grantedAt     DateTime      @db.Timestamptz(6) @map("granted_at")
+  withdrawnAt   DateTime?     @db.Timestamptz(6) @map("withdrawn_at")
+  ip            String?       @db.Inet
+  createdAt     DateTime      @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt     DateTime      @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  @@index([userId], map: "consent_record_user_id_idx")
+  @@index([childId], map: "consent_record_child_id_idx")
+  @@map("consent_record")
+}

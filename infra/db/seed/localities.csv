@@ -1,0 +1,16 @@
+# DEV SAMPLE — replace with official list in Phase 0
+# 03-database.md §10: "Districts and localities loaded from
+# infra/db/seed/localities.csv... a small development sample for Greater
+# Accra, with pilot areas marked as served." These names are a reasonable
+# development fixture, not the checked official administrative list.
+region,district,locality,is_served
+Greater Accra,Accra Metropolitan,Osu,true
+Greater Accra,Accra Metropolitan,Adabraka,true
+Greater Accra,Accra Metropolitan,Korle Gonno,false
+Greater Accra,Tema Metropolitan,Tema Community 1,true
+Greater Accra,Tema Metropolitan,Tema Community 25,false
+Greater Accra,Ga East Municipal,Abokobi,false
+Greater Accra,Ga East Municipal,Dome,true
+Greater Accra,Ga West Municipal,Amasaman,false
+Greater Accra,Ledzokuku Municipal,Teshie,true
+Greater Accra,Ashaiman Municipal,Ashaiman,false

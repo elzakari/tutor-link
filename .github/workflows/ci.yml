@@ -115,17 +115,23 @@ jobs:
             turbo-${{ runner.os }}-api-integration-
 
       - name: Run database migrations
-        # No-op until S1-04 lands the Prisma schema and migrations; kept
-        # here so this job already exercises the real command and service
-        # containers it will depend on.
+        # S1-04: applies infra/db/roles.sql then every Prisma migration,
+        # against this job's fresh Postgres container.
         run: pnpm db:migrate
 
-      - name: API integration tests
-        # No dedicated integration suite exists yet (S1-04/S1-05 add
-        # DB-backed tests); this runs apps/api's test suite against the
-        # live Postgres/Redis service containers above so the job is wired
-        # correctly ahead of those tasks.
+      - name: Seed database
+        # Exercises the seed script in CI too (it is also run twice by
+        # test:integration's seed-idempotency.integration-spec.ts).
+        run: pnpm db:seed
+
+      - name: Unit tests
         run: pnpm --filter @tutor-link/api test
+
+      - name: API integration tests (DB-backed)
+        # S1-04: migrations, grants, schema shape and seed idempotency,
+        # against the live Postgres/Redis service containers above.
+        # S1-05 adds application-level DB-backed tests here too.
+        run: pnpm --filter @tutor-link/api test:integration
 
   security:
     name: security

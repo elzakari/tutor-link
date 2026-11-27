@@ -69,7 +69,25 @@ port in step 3 you do not need to edit anything.
 boot: if a required variable is missing or invalid, the API prints which
 one(s) and exits non-zero instead of starting in a broken state.
 
-## 5. Run
+## 5. Initialise the database
+
+```bash
+pnpm db:migrate
+pnpm db:seed
+```
+
+`db:migrate` first ensures the cluster-level roles from `infra/db/roles.sql`
+exist, then applies every Prisma migration in order. The roles script is
+idempotent: although Postgres roles are cluster-wide and conceptually created
+once per cluster, rerunning the command is safe and leaves existing roles
+untouched. In staging/production, create those roles with secrets-manager-issued
+passwords instead of the fixed local/CI development defaults in `roles.sql`.
+
+`db:seed` is also idempotent. It loads the platform organisation, Ghana's 16
+regions, class levels, and the marked development samples under
+`infra/db/seed/`; running it again does not create duplicates.
+
+## 6. Run
 
 ```bash
 pnpm dev

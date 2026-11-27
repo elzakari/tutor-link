@@ -1,0 +1,23 @@
+# DEV SAMPLE — replace with official NaCCA/WAEC subject lists in Phase 0
+# 03-database.md §10: "Subjects... from NaCCA and WAEC subject lists, checked
+# in Phase 0." This is a development fixture covering common basic and SHS
+# subjects, not the checked official list.
+name,slug
+Mathematics,mathematics
+English Language,english-language
+Integrated Science,integrated-science
+Social Studies,social-studies
+Information and Communication Technology,ict
+French,french
+Religious and Moral Education,religious-and-moral-education
+Core Mathematics,core-mathematics
+Elective Mathematics,elective-mathematics
+Physics,physics
+Chemistry,chemistry
+Biology,biology
+Economics,economics
+Geography,geography
+Government,government
+Literature in English,literature-in-english
+Financial Accounting,financial-accounting
+Business Management,business-management
