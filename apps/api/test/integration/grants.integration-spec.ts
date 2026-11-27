@@ -107,4 +107,25 @@ describe("database role grants (03-database.md §9)", () => {
       await client.end();
     }
   });
+
+  it.each(["tl_app", "tl_readonly"] as const)(
+    "%s cannot read or falsify Prisma migration history",
+    async (role) => {
+      const client = await connectAsRole(role);
+      try {
+        await expect(
+          client.query("select migration_name from _prisma_migrations limit 1"),
+        ).rejects.toMatchObject({ code: "42501" });
+        await expect(
+          client.query(
+            `insert into _prisma_migrations
+               (id, checksum, migration_name, started_at, applied_steps_count)
+             values ('grant-test', 'grant-test', 'grant-test', now(), 0)`,
+          ),
+        ).rejects.toMatchObject({ code: "42501" });
+      } finally {
+        await client.end();
+      }
+    },
+  );
 });

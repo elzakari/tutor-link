@@ -17,7 +17,7 @@ describe("migrations applied", () => {
     await client.end();
   });
 
-  it("recorded all 5 S1-04 migrations as finished, with no rolled-back steps", async () => {
+  it("recorded all S1-04 migrations as finished, with no rolled-back steps", async () => {
     const { rows } = await client.query(
       `select migration_name, finished_at, rolled_back_at
        from _prisma_migrations
@@ -32,6 +32,7 @@ describe("migrations applied", () => {
         "0003_platform",
         "0004_identity_family",
         "0005_roles_and_grants",
+        "0006_harden_migration_history",
       ]),
     );
     for (const row of rows) {
