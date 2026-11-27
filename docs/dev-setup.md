@@ -95,6 +95,22 @@ pnpm dev
 
 Starts `apps/web` and `apps/api` together (Turborepo). Web: http://localhost:3000. API: http://localhost:3001/api/v1 (port 3001 unless you changed `PORT` in `apps/api/.env`).
 
+## Dependency overrides
+
+Root `package.json`'s `pnpm.overrides` currently pins two transitive
+dependencies above what `prisma@6.19.3` (the latest available 6.x release —
+there is no newer 6.x patch) resolves on its own:
+
+- `effect` → `^3.22.1`, fixing [GHSA-7589-6fvf-x4pw](https://github.com/advisories/GHSA-7589-6fvf-x4pw)
+  (ReDoS in `Schema.TemplateLiteral`'s compiled regex), pulled in via
+  `@prisma/client` → `prisma` (peer) → `@prisma/config` → `effect@3.21.0`.
+- `deepmerge-ts` → `^8.0.0`, fixing [GHSA-ggr8-5vv4-36mx](https://github.com/advisories/GHSA-ggr8-5vv4-36mx)
+  (stack exhaustion merging recursive object graphs), pulled in the same way.
+
+`package.json` cannot hold comments, so this note is that comment. Remove
+both override entries the next time `prisma`/`@prisma/client` are upgraded
+and `pnpm audit --prod --audit-level=high` is clean without them.
+
 ## Troubleshooting: port clashes
 
 If `pnpm docker:up` fails with something like

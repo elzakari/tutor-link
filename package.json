@@ -34,7 +34,9 @@
   },
   "pnpm": {
     "overrides": {
-      "handlebars": ">=4.7.10"
+      "handlebars": ">=4.7.10",
+      "effect": "^3.22.1",
+      "deepmerge-ts": "^8.0.0"
     }
   }
 }
