@@ -16,8 +16,8 @@
     "docker:up": "docker compose -f infra/docker/docker-compose.yml up -d",
     "docker:down": "docker compose -f infra/docker/docker-compose.yml down",
     "docker:reset": "node ./scripts/docker-reset.mjs",
-    "db:migrate": "node ./scripts/not-implemented.mjs db:migrate",
-    "db:seed": "node ./scripts/not-implemented.mjs db:seed",
+    "db:migrate": "pnpm --filter @tutor-link/api db:migrate",
+    "db:seed": "pnpm --filter @tutor-link/api db:seed",
     "format": "prettier --write .",
     "prepare": "husky"
   },
@@ -34,7 +34,9 @@
   },
   "pnpm": {
     "overrides": {
-      "handlebars": ">=4.7.10"
+      "handlebars": ">=4.7.10",
+      "effect": "^3.22.1",
+      "deepmerge-ts": "^8.0.0"
     }
   }
 }

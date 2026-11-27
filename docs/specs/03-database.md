@@ -742,6 +742,8 @@ Prisma Migrate owns ordinary tables. Raw SQL migrations add what Prisma cannot e
 | 0008 | Learning, reviews and messaging tables |
 | 0009 | Indexes, database roles and grants |
 
+S1-04 ships the initial database roles and grants in migration `0005_roles_and_grants`, not the `0009` reserved above — see that migration's own header comment for why.
+
 **Seed data**
 
 | Data | Contents | Source |

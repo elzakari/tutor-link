@@ -1,0 +1,13 @@
+-- 0006_harden_migration_history
+--
+-- 0005_roles_and_grants grants tl_app read/write access to all tables that
+-- exist at that point, then narrows sensitive application tables. Prisma's
+-- internal _prisma_migrations table also exists by then, so that blanket
+-- grant unintentionally allowed the runtime application role to read or
+-- falsify migration history.
+--
+-- Migration metadata belongs to the migration job, not the application or
+-- analytics roles. Revoke every table privilege explicitly. This is a new
+-- forward-only migration rather than an edit to applied migration 0005
+-- (CLAUDE.md rule 15; 03-database.md §10 migration rule 2).
+revoke all privileges on table _prisma_migrations from tl_app, tl_readonly;
